@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  vizzy:
+    container_name: ${CONTAINER_NAME:-vizzy}
+    hostname: ${CONTAINER_HOSTNAME:-vizzy}
+    build: .
+    environment:
+      - TZ=America/New_York
+      - VIZIO_IP=${VIZIO_IP:-192.168.1.100}
+      - VIZIO_PORT=${VIZIO_PORT:-7345}
+      - VIZIO_AUTH_TOKEN=${VIZIO_AUTH_TOKEN}
+    ports:
+      - '8000:8000'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - vizzy-network
+
+networks:
+  vizzy-network:
+    driver: bridge

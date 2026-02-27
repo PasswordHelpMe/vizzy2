@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vizio TV Controller</title>
+    <meta name="description" content="Control your Vizio SmartCast TV from any device">
+    <meta name="theme-color" content="#007AFF">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="app-title">📺 Vizio TV Controller</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Power Tab -->
+            <div id="power" class="tab-panel active">
+                <div class="status-card">
+                    <h2>TV Status</h2>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="label">Power:</span>
+                            <span class="value" id="powerStatus">Unknown</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Volume:</span>
+                            <span class="value" id="volumeStatus">Unknown</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Input:</span>
+                            <span class="value" id="inputStatus">Unknown</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Muted:</span>
+                            <span class="value" id="muteStatus">Unknown</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-grid">
+                    <button class="action-card power-on" onclick="setPower('on')">
+                        <span class="icon">🟢</span>
+                        <span class="label">Turn On</span>
+                    </button>
+                    <button class="action-card power-off" onclick="setPower('off')">
+                        <span class="icon">🔴</span>
+                        <span class="label">Turn Off</span>
+                    </button>
+                    <button class="action-card refresh" onclick="refreshStatus()">
+                        <span class="icon">🔄</span>
+                        <span class="label">Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Volume Tab -->
+            <div id="volume" class="tab-panel">
+                <div class="volume-control">
+                    <h2>Volume Control</h2>
+                    <div class="volume-slider-container">
+                        <span class="volume-icon">🔇</span>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider">
+                        <span class="volume-icon">🔊</span>
+                    </div>
+                    <div class="volume-display">
+                        <span id="volumeValue">50%</span>
+                    </div>
+                </div>
+
+                <div class="volume-presets">
+                    <button class="preset-btn" onclick="setVolume(25)">25%</button>
+                    <button class="preset-btn" onclick="setVolume(50)">50%</button>
+                    <button class="preset-btn" onclick="setVolume(75)">75%</button>
+                    <button class="preset-btn" onclick="setVolume(100)">100%</button>
+                </div>
+
+                <div class="mute-controls">
+                    <button class="action-card mute" onclick="setMute(true)">
+                        <span class="icon">🔇</span>
+                        <span class="label">Mute</span>
+                    </button>
+                    <button class="action-card unmute" onclick="setMute(false)">
+                        <span class="icon">🔊</span>
+                        <span class="label">Unmute</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Tab -->
+            <div id="input" class="tab-panel">
+                <div class="input-grid">
+                    <button class="input-card" onclick="setInput('HDMI-1')">
+                        <span class="icon">📺</span>
+                        <span class="label">HDMI-1</span>
+                    </button>
+                    <button class="input-card" onclick="setInput('HDMI-2')">
+                        <span class="icon">📺</span>
+                        <span class="label">HDMI-2</span>
+                    </button>
+                    <button class="input-card" onclick="setInput('HDMI-3')">
+                        <span class="icon">📺</span>
+                        <span class="label">HDMI-3</span>
+                    </button>
+                    <button class="input-card" onclick="setInput('SMARTCAST')">
+                        <span class="icon">📡</span>
+                        <span class="label">SmartCast</span>
+                    </button>
+                    <button class="input-card" onclick="setInput('COMPONENT')">
+                        <span class="icon">📺</span>
+                        <span class="label">Component</span>
+                    </button>
+                    <button class="input-card" onclick="setInput('AV')">
+                        <span class="icon">📺</span>
+                        <span class="label">AV</span>
+                    </button>
+                </div>
+
+                <div class="current-input">
+                    <h3>Current Input</h3>
+                    <div class="current-input-display" id="currentInputDisplay">
+                        Unknown
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apps Tab -->
+            <div id="apps" class="tab-panel">
+                <div class="apps-grid" id="appsGrid">
+                    <p class="apps-placeholder">Connect to load apps</p>
+                </div>
+            </div>
+
+            <!-- Remote Tab -->
+            <div id="remote" class="tab-panel">
+                <div class="dpad-container">
+                    <h2>Remote Navigation</h2>
+                    <div class="dpad">
+                        <div class="dpad-row">
+                            <button class="dpad-btn" onclick="sendRemoteKey('UP')">&#9650;</button>
+                        </div>
+                        <div class="dpad-row">
+                            <button class="dpad-btn" onclick="sendRemoteKey('LEFT')">&#9664;</button>
+                            <button class="dpad-btn dpad-ok" onclick="sendRemoteKey('OK')">OK</button>
+                            <button class="dpad-btn" onclick="sendRemoteKey('RIGHT')">&#9654;</button>
+                        </div>
+                        <div class="dpad-row">
+                            <button class="dpad-btn" onclick="sendRemoteKey('DOWN')">&#9660;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-panel">
+                <div class="settings-section">
+                    <h2>Configuration</h2>
+                    <div class="setting-item">
+                        <label for="apiUrl">API URL:</label>
+                        <input type="url" id="apiUrl" placeholder="http://192.168.1.100:8000" value="">
+                        <button class="btn-secondary" onclick="saveApiUrl()">Save</button>
+                    </div>
+                    <button class="btn-primary" onclick="testConnection()">Test Connection</button>
+                </div>
+
+                <div class="settings-section">
+                    <h2>TV Information</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Connection:</span>
+                            <span class="value" id="connectionInfo">Unknown</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">API Status:</span>
+                            <span class="value" id="apiStatus">Unknown</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>Actions</h2>
+                    <button class="btn-secondary" onclick="refreshAllData()">Refresh All Data</button>
+                    <button class="btn-secondary" onclick="resetSettings()">Reset Settings</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="power">
+                <span class="tab-icon">⚡</span>
+                <span class="tab-label">Power</span>
+            </button>
+            <button class="tab-btn" data-tab="volume">
+                <span class="tab-icon">🔊</span>
+                <span class="tab-label">Volume</span>
+            </button>
+            <button class="tab-btn" data-tab="input">
+                <span class="tab-icon">📺</span>
+                <span class="tab-label">Input</span>
+            </button>
+            <button class="tab-btn" data-tab="apps">
+                <span class="tab-icon">📱</span>
+                <span class="tab-label">Apps</span>
+            </button>
+            <button class="tab-btn" data-tab="remote">
+                <span class="tab-icon">🎮</span>
+                <span class="tab-label">Remote</span>
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <span class="tab-icon">⚙️</span>
+                <span class="tab-label">Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Connecting to TV...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
