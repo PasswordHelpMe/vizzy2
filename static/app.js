@@ -1,7 +1,6 @@
-// Vizio TV Controller Web App
+// Vizio TV Controller Web App — Tactical Noir UI
 class VizioTVController {
     constructor() {
-        // Use localStorage override if set, otherwise same origin (empty string)
         this.apiUrl = localStorage.getItem('vizioApiUrl') || '';
         this.isConnected = false;
         this.tvInfo = null;
@@ -11,6 +10,8 @@ class VizioTVController {
     init() {
         this.setupTabNavigation();
         this.setupVolumeSlider();
+        this.setupSettingsButton();
+        this.setupAppSearch();
         this.loadSettings();
         this.setupServiceWorker();
         this.testConnection();
@@ -25,25 +26,56 @@ class VizioTVController {
             button.addEventListener('click', () => {
                 const targetTab = button.getAttribute('data-tab');
 
-                // Update active tab button
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
 
-                // Update active tab panel
                 tabPanels.forEach(panel => panel.classList.remove('active'));
                 document.getElementById(targetTab).classList.add('active');
             });
         });
     }
 
+    // Settings button opens settings tab
+    setupSettingsButton() {
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                const tabPanels = document.querySelectorAll('.tab-panel');
+
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+
+                document.getElementById('settings').classList.add('active');
+            });
+        }
+    }
+
+    // App search filter
+    setupAppSearch() {
+        const searchInput = document.getElementById('appSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('#appsGrid .app-card');
+                cards.forEach(card => {
+                    const label = card.querySelector('.app-card-label');
+                    if (label) {
+                        const match = label.textContent.toLowerCase().includes(query);
+                        card.style.display = match ? '' : 'none';
+                    }
+                });
+            });
+        }
+    }
+
     // Volume Slider
     setupVolumeSlider() {
         const volumeSlider = document.getElementById('volumeSlider');
-        const volumeValue = document.getElementById('volumeValue');
 
         volumeSlider.addEventListener('input', (e) => {
-            const value = e.target.value;
-            volumeValue.textContent = `${value}%`;
+            const value = parseInt(e.target.value);
+            this.updateVolumeUI(value);
         });
 
         volumeSlider.addEventListener('change', (e) => {
@@ -52,15 +84,37 @@ class VizioTVController {
         });
     }
 
+    // Update all volume UI elements
+    updateVolumeUI(value) {
+        // Volume tab
+        const bigNumber = document.getElementById('volumeBigNumber');
+        const trackFill = document.getElementById('volumeTrackFill');
+        const trackThumb = document.getElementById('volumeTrackThumb');
+        const slider = document.getElementById('volumeSlider');
+
+        if (bigNumber) bigNumber.textContent = value;
+        if (trackFill) trackFill.style.height = `${value}%`;
+        if (trackThumb) trackThumb.style.bottom = `calc(${value}% + 4px)`;
+        if (slider) slider.value = value;
+
+        // Power tab bento
+        const bentoVol = document.getElementById('volumeStatus');
+        if (bentoVol) bentoVol.textContent = value;
+
+        // Remote tab
+        const remoteVol = document.getElementById('remoteVolDisplay');
+        const remoteBar = document.getElementById('remoteVolBar');
+        if (remoteVol) remoteVol.textContent = value;
+        if (remoteBar) remoteBar.style.width = `${value}%`;
+    }
+
     // API Communication
     async makeApiRequest(endpoint, method = 'GET', data = null) {
         try {
             const url = `${this.apiUrl}${endpoint}`;
             const options = {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+                headers: { 'Content-Type': 'application/json' }
             };
 
             if (data) {
@@ -112,9 +166,17 @@ class VizioTVController {
     updateConnectionStatus(text, connected) {
         const statusText = document.getElementById('statusText');
         const statusDot = document.getElementById('statusDot');
+        const heroBadge = document.getElementById('heroBadgeText');
+        const heroBarFill = document.getElementById('heroBarFill');
+        const connectionInfo = document.getElementById('connectionInfo');
+        const apiStatus = document.getElementById('apiStatus');
 
-        statusText.textContent = text;
-        statusDot.classList.toggle('connected', connected);
+        if (statusText) statusText.textContent = text;
+        if (statusDot) statusDot.classList.toggle('connected', connected);
+        if (heroBadge) heroBadge.textContent = connected ? 'Connected' : 'Disconnected';
+        if (heroBarFill) heroBarFill.style.width = connected ? '100%' : '0%';
+        if (connectionInfo) connectionInfo.textContent = connected ? 'Active' : 'Inactive';
+        if (apiStatus) apiStatus.textContent = connected ? 'Online' : 'Offline';
     }
 
     // Refresh TV Status
@@ -134,19 +196,33 @@ class VizioTVController {
 
     // Update Status Display
     updateStatusDisplay(tvInfo) {
-        document.getElementById('powerStatus').textContent = tvInfo.power || 'Unknown';
-        document.getElementById('volumeStatus').textContent = `${tvInfo.volume || 0}%`;
-        document.getElementById('inputStatus').textContent = tvInfo.input || 'Unknown';
-        document.getElementById('muteStatus').textContent = tvInfo.muted ? 'Yes' : 'No';
-        document.getElementById('currentInputDisplay').textContent = tvInfo.input || 'Unknown';
+        // Power status
+        const powerStatus = document.getElementById('powerStatus');
+        const powerBtn = document.getElementById('powerToggleBtn');
+        const powerText = document.getElementById('powerToggleText');
+        const isOn = tvInfo.power === 'on' || tvInfo.power === 'On' || tvInfo.power === true;
 
-        // Update volume slider
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeValue = document.getElementById('volumeValue');
-        if (tvInfo.volume !== undefined) {
-            volumeSlider.value = tvInfo.volume;
-            volumeValue.textContent = `${tvInfo.volume}%`;
+        if (powerStatus) powerStatus.textContent = isOn ? 'ON' : 'OFF';
+        if (powerBtn) {
+            powerBtn.classList.toggle('power-on-state', !isOn);
         }
+        if (powerText) {
+            powerText.textContent = isOn ? 'POWER OFF SYSTEM' : 'POWER ON SYSTEM';
+        }
+
+        // Volume
+        const vol = tvInfo.volume || 0;
+        this.updateVolumeUI(vol);
+
+        // Input
+        const inputStatus = document.getElementById('inputStatus');
+        const currentInput = document.getElementById('currentInputDisplay');
+        if (inputStatus) inputStatus.textContent = tvInfo.input || 'Unknown';
+        if (currentInput) currentInput.textContent = tvInfo.input || 'Unknown';
+
+        // Mute
+        const muteStatus = document.getElementById('muteStatus');
+        if (muteStatus) muteStatus.textContent = tvInfo.muted ? 'YES' : 'NO';
     }
 
     // Power Control
@@ -168,6 +244,12 @@ class VizioTVController {
         } finally {
             this.showLoading(false);
         }
+    }
+
+    // Toggle Power based on current state
+    togglePower() {
+        const isOn = this.tvInfo && (this.tvInfo.power === 'on' || this.tvInfo.power === 'On' || this.tvInfo.power === true);
+        this.setPower(isOn ? 'off' : 'on');
     }
 
     // Volume Control
@@ -237,13 +319,19 @@ class VizioTVController {
                 const button = document.createElement('button');
                 button.className = 'app-card';
                 button.onclick = () => this.launchApp(appName);
+
+                const iconWrapper = document.createElement('div');
+                iconWrapper.className = 'app-card-icon';
                 const icon = document.createElement('span');
-                icon.className = 'icon';
-                icon.textContent = '\uD83D\uDCFA';
+                icon.className = 'material-symbols-outlined';
+                icon.textContent = 'tv';
+                iconWrapper.appendChild(icon);
+
                 const label = document.createElement('span');
-                label.className = 'label';
+                label.className = 'app-card-label';
                 label.textContent = appName;
-                button.appendChild(icon);
+
+                button.appendChild(iconWrapper);
                 button.appendChild(label);
                 grid.appendChild(button);
             });
@@ -280,7 +368,7 @@ class VizioTVController {
         try {
             const response = await this.makeApiRequest('/tv/remote', 'POST', { key });
             if (response) {
-                this.showToast(`Key '${key}' sent`, 'success');
+                // Subtle feedback, no toast for remote keys
             }
         } catch (error) {
             this.showToast('Failed to send remote key', 'error');
@@ -290,7 +378,7 @@ class VizioTVController {
     // Settings Management
     loadSettings() {
         const apiUrlInput = document.getElementById('apiUrl');
-        apiUrlInput.value = this.apiUrl;
+        if (apiUrlInput) apiUrlInput.value = this.apiUrl;
     }
 
     saveApiUrl() {
@@ -315,13 +403,14 @@ class VizioTVController {
 
     refreshAllData() {
         this.refreshStatus();
+        this.loadApps();
         this.showToast('Data refreshed', 'success');
     }
 
     // UI Helpers
     showLoading(show) {
         const overlay = document.getElementById('loadingOverlay');
-        overlay.classList.toggle('hidden', !show);
+        if (overlay) overlay.classList.toggle('hidden', !show);
     }
 
     showToast(message, type = 'info') {
@@ -329,110 +418,49 @@ class VizioTVController {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.textContent = message;
-
         container.appendChild(toast);
-
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
+        setTimeout(() => toast.remove(), 3000);
     }
 
     // Service Worker for PWA
     setupServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
-                    console.log('SW registered: ', registration);
-                })
-                .catch(registrationError => {
-                    console.log('SW registration failed: ', registrationError);
-                });
+                .then(registration => console.log('SW registered:', registration))
+                .catch(err => console.log('SW registration failed:', err));
         }
     }
 }
 
 // Global functions for HTML onclick handlers
-function setPower(power) {
-    app.setPower(power);
-}
+function setPower(power) { app.setPower(power); }
+function setVolume(volume) { app.setVolume(volume); }
+function setMute(muted) { app.setMute(muted); }
+function setInput(inputName) { app.setInput(inputName); }
+function launchApp(appName) { app.launchApp(appName); }
+function sendRemoteKey(key) { app.sendRemoteKey(key); }
+function refreshStatus() { app.refreshStatus(); }
+function testConnection() { app.testConnection(); }
+function saveApiUrl() { app.saveApiUrl(); }
+function resetSettings() { app.resetSettings(); }
+function refreshAllData() { app.refreshAllData(); }
+function togglePower() { app.togglePower(); }
+function cycleSoundMode() { app.showToast('Sound mode cycling', 'info'); }
 
-function setVolume(volume) {
-    app.setVolume(volume);
-}
-
-function setMute(muted) {
-    app.setMute(muted);
-}
-
-function setInput(inputName) {
-    app.setInput(inputName);
-}
-
-function launchApp(appName) {
-    app.launchApp(appName);
-}
-
-function sendRemoteKey(key) {
-    app.sendRemoteKey(key);
-}
-
-function refreshStatus() {
-    app.refreshStatus();
-}
-
-function testConnection() {
-    app.testConnection();
-}
-
-function saveApiUrl() {
-    app.saveApiUrl();
-}
-
-function resetSettings() {
-    app.resetSettings();
-}
-
-function refreshAllData() {
-    app.refreshAllData();
-}
-
-// Initialize the app when DOM is loaded
+// Initialize
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new VizioTVController();
 });
 
-// Handle install prompt for PWA
+// PWA install prompt
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-
-    // Show install button if needed
-    const installButton = document.createElement('button');
-    installButton.textContent = 'Install App';
-    installButton.className = 'btn-primary';
-    installButton.onclick = () => {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            deferredPrompt = null;
-        });
-    };
-
-    // Add install button to settings if needed
-    const settingsSection = document.querySelector('.settings-section:last-child');
-    if (settingsSection) {
-        settingsSection.appendChild(installButton);
-    }
 });
 
-// Handle online/offline status
+// Online/offline handling
 window.addEventListener('online', () => {
     app.showToast('Back online', 'success');
 });
@@ -442,9 +470,9 @@ window.addEventListener('offline', () => {
     app.updateConnectionStatus('Offline', false);
 });
 
-// Handle visibility change for background refresh
+// Refresh on visibility change
 document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && app.isConnected) {
+    if (!document.hidden && app && app.isConnected) {
         app.refreshStatus();
     }
 });

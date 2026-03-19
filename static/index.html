@@ -1,20 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vizio TV Controller</title>
+    <title>VIZIO Controller</title>
     <meta name="description" content="Control your Vizio SmartCast TV from any device">
-    <meta name="theme-color" content="#007AFF">
+    <meta name="theme-color" content="#131313">
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app">
         <!-- Header -->
         <header class="header">
-            <h1 class="app-title">📺 Vizio TV Controller</h1>
+            <button class="header-btn" id="settingsBtn">
+                <span class="material-symbols-outlined">settings</span>
+            </button>
+            <h1 class="app-title">VIZIO</h1>
             <div class="connection-status" id="connectionStatus">
                 <span class="status-dot" id="statusDot"></span>
                 <span class="status-text" id="statusText">Connecting...</span>
@@ -25,200 +30,360 @@
         <main class="main-content">
             <!-- Power Tab -->
             <div id="power" class="tab-panel active">
-                <div class="status-card">
-                    <h2>TV Status</h2>
-                    <div class="status-grid">
-                        <div class="status-item">
-                            <span class="label">Power:</span>
-                            <span class="value" id="powerStatus">Unknown</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Volume:</span>
-                            <span class="value" id="volumeStatus">Unknown</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Input:</span>
-                            <span class="value" id="inputStatus">Unknown</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Muted:</span>
-                            <span class="value" id="muteStatus">Unknown</span>
-                        </div>
+                <!-- Power State Hero -->
+                <div class="hero-card">
+                    <div class="hero-connected-badge">
+                        <div class="connected-dot"></div>
+                        <span class="connected-label" id="heroBadgeText">Connected</span>
+                    </div>
+                    <span class="hero-subtitle">Current Status</span>
+                    <h2 class="hero-title" id="powerStatus">ON</h2>
+                    <div class="hero-bar">
+                        <div class="hero-bar-fill" id="heroBarFill"></div>
                     </div>
                 </div>
 
-                <div class="action-grid">
-                    <button class="action-card power-on" onclick="setPower('on')">
-                        <span class="icon">🟢</span>
-                        <span class="label">Turn On</span>
+                <!-- Bento Status Grid -->
+                <div class="bento-grid">
+                    <div class="bento-card bento-square">
+                        <div class="bento-card-header">
+                            <span class="material-symbols-outlined bento-icon text-primary">volume_up</span>
+                            <span class="bento-label">Volume</span>
+                        </div>
+                        <div class="bento-card-value">
+                            <span class="bento-big-number" id="volumeStatus">0</span>
+                            <span class="bento-unit">%</span>
+                        </div>
+                    </div>
+                    <div class="bento-card bento-square">
+                        <div class="bento-card-header">
+                            <span class="material-symbols-outlined bento-icon text-tertiary">input</span>
+                            <span class="bento-label">Input</span>
+                        </div>
+                        <div class="bento-card-value">
+                            <span class="bento-input-name" id="inputStatus">HDMI 1</span>
+                        </div>
+                    </div>
+                    <div class="bento-card">
+                        <div class="bento-card-header">
+                            <span class="material-symbols-outlined bento-icon text-muted">volume_off</span>
+                            <span class="bento-label">Muted</span>
+                        </div>
+                        <span class="bento-status-text" id="muteStatus">NO</span>
+                    </div>
+                    <button class="bento-card bento-btn" onclick="refreshStatus()">
+                        <div class="bento-card-header">
+                            <span class="material-symbols-outlined bento-icon">sync</span>
+                        </div>
+                        <span class="bento-action-label">Refresh</span>
                     </button>
-                    <button class="action-card power-off" onclick="setPower('off')">
-                        <span class="icon">🔴</span>
-                        <span class="label">Turn Off</span>
-                    </button>
-                    <button class="action-card refresh" onclick="refreshStatus()">
-                        <span class="icon">🔄</span>
-                        <span class="label">Refresh</span>
+                </div>
+
+                <!-- Power Off Button -->
+                <div class="power-action">
+                    <button class="power-off-btn" id="powerToggleBtn" onclick="togglePower()">
+                        <span class="material-symbols-outlined power-off-icon">power_settings_new</span>
+                        <span class="power-off-text" id="powerToggleText">POWER OFF SYSTEM</span>
                     </button>
                 </div>
             </div>
 
             <!-- Volume Tab -->
             <div id="volume" class="tab-panel">
-                <div class="volume-control">
-                    <h2>Volume Control</h2>
-                    <div class="volume-slider-container">
-                        <span class="volume-icon">🔇</span>
-                        <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider">
-                        <span class="volume-icon">🔊</span>
+                <div class="volume-header">
+                    <div>
+                        <span class="volume-device-label">Living Room TV</span>
+                        <h2 class="volume-title">Audio Control</h2>
                     </div>
                     <div class="volume-display">
-                        <span id="volumeValue">50%</span>
+                        <span class="volume-big-number" id="volumeBigNumber">0</span>
+                        <span class="volume-percent">%</span>
                     </div>
                 </div>
 
-                <div class="volume-presets">
-                    <button class="preset-btn" onclick="setVolume(25)">25%</button>
-                    <button class="preset-btn" onclick="setVolume(50)">50%</button>
-                    <button class="preset-btn" onclick="setVolume(75)">75%</button>
-                    <button class="preset-btn" onclick="setVolume(100)">100%</button>
+                <div class="volume-controls-grid">
+                    <div class="volume-slider-column">
+                        <div class="volume-track">
+                            <div class="volume-track-fill" id="volumeTrackFill"></div>
+                            <div class="volume-track-thumb" id="volumeTrackThumb"></div>
+                        </div>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="0" class="volume-slider-input" orient="vertical">
+                        <div class="volume-marks">
+                            <span>100</span><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span>
+                        </div>
+                    </div>
+                    <div class="volume-side-controls">
+                        <button class="volume-side-btn" onclick="setMute(true)">
+                            <div class="volume-side-btn-icon">
+                                <span class="material-symbols-outlined">volume_off</span>
+                            </div>
+                            <span class="volume-side-btn-label">Mute</span>
+                        </button>
+                        <button class="volume-side-btn" onclick="cycleSoundMode()">
+                            <div class="volume-side-btn-icon">
+                                <span class="material-symbols-outlined">surround_sound</span>
+                            </div>
+                            <span class="volume-side-btn-label">Mode</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="mute-controls">
-                    <button class="action-card mute" onclick="setMute(true)">
-                        <span class="icon">🔇</span>
-                        <span class="label">Mute</span>
-                    </button>
-                    <button class="action-card unmute" onclick="setMute(false)">
-                        <span class="icon">🔊</span>
-                        <span class="label">Unmute</span>
-                    </button>
+                <div class="volume-bottom-cards">
+                    <div class="volume-info-card">
+                        <span class="material-symbols-outlined text-tertiary">graphic_eq</span>
+                        <div>
+                            <span class="volume-info-label">Equalizer</span>
+                            <span class="volume-info-value">Cinema</span>
+                        </div>
+                    </div>
+                    <div class="volume-info-card">
+                        <span class="material-symbols-outlined text-secondary">speaker_group</span>
+                        <div>
+                            <span class="volume-info-label">Output</span>
+                            <span class="volume-info-value">System</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Input Tab -->
             <div id="input" class="tab-panel">
-                <div class="input-grid">
+                <div class="input-page-header">
+                    <span class="input-activity-label">Current Activity</span>
+                    <div class="input-title-row">
+                        <h2 class="input-page-title">Inputs</h2>
+                        <span class="input-source-tag">Source</span>
+                    </div>
+                </div>
+
+                <div class="input-bento-grid" id="inputGrid">
                     <button class="input-card" onclick="setInput('HDMI-1')">
-                        <span class="icon">📺</span>
-                        <span class="label">HDMI-1</span>
+                        <div class="input-card-top">
+                            <span class="material-symbols-outlined input-card-icon">settings_input_hdmi</span>
+                        </div>
+                        <div class="input-card-bottom">
+                            <span class="input-card-name">HDMI 1</span>
+                            <span class="input-card-status">Ready</span>
+                        </div>
                     </button>
-                    <button class="input-card" onclick="setInput('HDMI-2')">
-                        <span class="icon">📺</span>
-                        <span class="label">HDMI-2</span>
+                    <button class="input-card input-card-active" onclick="setInput('HDMI-2')" id="inputHDMI2">
+                        <div class="input-card-top">
+                            <span class="material-symbols-outlined input-card-icon filled">settings_input_hdmi</span>
+                            <div class="input-active-dot-wrapper">
+                                <span class="input-active-dot-ping"></span>
+                                <span class="input-active-dot"></span>
+                            </div>
+                        </div>
+                        <div class="input-card-bottom">
+                            <span class="input-card-name active">HDMI 2</span>
+                            <span class="input-card-status active">Current Active</span>
+                        </div>
                     </button>
                     <button class="input-card" onclick="setInput('HDMI-3')">
-                        <span class="icon">📺</span>
-                        <span class="label">HDMI-3</span>
+                        <div class="input-card-top">
+                            <span class="material-symbols-outlined input-card-icon">settings_input_hdmi</span>
+                        </div>
+                        <div class="input-card-bottom">
+                            <span class="input-card-name">HDMI 3</span>
+                            <span class="input-card-status">Offline</span>
+                        </div>
                     </button>
-                    <button class="input-card" onclick="setInput('SMARTCAST')">
-                        <span class="icon">📡</span>
-                        <span class="label">SmartCast</span>
-                    </button>
-                    <button class="input-card" onclick="setInput('COMPONENT')">
-                        <span class="icon">📺</span>
-                        <span class="label">Component</span>
-                    </button>
-                    <button class="input-card" onclick="setInput('AV')">
-                        <span class="icon">📺</span>
-                        <span class="label">AV</span>
+                    <button class="input-card" onclick="setInput('TV')">
+                        <div class="input-card-top">
+                            <span class="material-symbols-outlined input-card-icon">tv</span>
+                        </div>
+                        <div class="input-card-bottom">
+                            <span class="input-card-name">Live TV</span>
+                            <span class="input-card-status">Antenna</span>
+                        </div>
                     </button>
                 </div>
 
-                <div class="current-input">
-                    <h3>Current Input</h3>
-                    <div class="current-input-display" id="currentInputDisplay">
-                        Unknown
+                <button class="input-airplay-row" onclick="setInput('SMARTCAST')">
+                    <div class="input-airplay-left">
+                        <span class="material-symbols-outlined text-tertiary">airplay</span>
+                        <div>
+                            <span class="input-airplay-name">SmartCast</span>
+                            <span class="input-airplay-status">Ready to Stream</span>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined input-airplay-chevron">chevron_right</span>
+                </button>
+
+                <div class="input-now-displaying">
+                    <div class="input-now-icon-box">
+                        <span class="material-symbols-outlined">connected_tv</span>
+                    </div>
+                    <div class="input-now-info">
+                        <span class="input-now-label">Now Displaying</span>
+                        <span class="input-now-name" id="currentInputDisplay">HDMI 1</span>
                     </div>
                 </div>
             </div>
 
             <!-- Apps Tab -->
             <div id="apps" class="tab-panel">
-                <div class="apps-grid" id="appsGrid">
-                    <p class="apps-placeholder">Connect to load apps</p>
+                <div class="apps-search">
+                    <span class="material-symbols-outlined apps-search-icon">search</span>
+                    <input type="text" class="apps-search-input" placeholder="Search apps..." id="appSearchInput">
+                </div>
+
+                <div class="apps-section">
+                    <div class="apps-section-header">
+                        <h3 class="apps-section-title">Library</h3>
+                        <div class="apps-section-line"></div>
+                    </div>
+                    <div class="apps-grid" id="appsGrid">
+                        <p class="apps-placeholder">Connect to load apps</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Remote Tab -->
             <div id="remote" class="tab-panel">
-                <div class="dpad-container">
-                    <h2>Remote Navigation</h2>
-                    <div class="dpad">
-                        <div class="dpad-row">
-                            <button class="dpad-btn" onclick="sendRemoteKey('UP')">&#9650;</button>
-                        </div>
-                        <div class="dpad-row">
-                            <button class="dpad-btn" onclick="sendRemoteKey('LEFT')">&#9664;</button>
-                            <button class="dpad-btn dpad-ok" onclick="sendRemoteKey('OK')">OK</button>
-                            <button class="dpad-btn" onclick="sendRemoteKey('RIGHT')">&#9654;</button>
-                        </div>
-                        <div class="dpad-row">
-                            <button class="dpad-btn" onclick="sendRemoteKey('DOWN')">&#9660;</button>
+                <div class="remote-device-header">
+                    <h2 class="remote-device-name">Living Room TV</h2>
+                    <p class="remote-device-model">M-Series Quantum 4K</p>
+                </div>
+
+                <div class="remote-secondary-grid">
+                    <button class="remote-secondary-btn" onclick="sendRemoteKey('BACK')">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        <span class="remote-secondary-label">Back</span>
+                    </button>
+                    <button class="remote-secondary-btn" onclick="sendRemoteKey('HOME')">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="remote-secondary-label">Home</span>
+                    </button>
+                    <button class="remote-secondary-btn" onclick="sendRemoteKey('INFO')">
+                        <span class="material-symbols-outlined">info</span>
+                        <span class="remote-secondary-label">Info</span>
+                    </button>
+                    <button class="remote-secondary-btn" onclick="sendRemoteKey('MENU')">
+                        <span class="material-symbols-outlined">menu</span>
+                        <span class="remote-secondary-label">Menu</span>
+                    </button>
+                </div>
+
+                <!-- D-Pad -->
+                <div class="dpad-wrapper">
+                    <div class="dpad-bg"></div>
+                    <button class="dpad-btn dpad-up" onclick="sendRemoteKey('UP')">
+                        <span class="material-symbols-outlined">keyboard_arrow_up</span>
+                    </button>
+                    <button class="dpad-btn dpad-down" onclick="sendRemoteKey('DOWN')">
+                        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                    </button>
+                    <button class="dpad-btn dpad-left" onclick="sendRemoteKey('LEFT')">
+                        <span class="material-symbols-outlined">keyboard_arrow_left</span>
+                    </button>
+                    <button class="dpad-btn dpad-right" onclick="sendRemoteKey('RIGHT')">
+                        <span class="material-symbols-outlined">keyboard_arrow_right</span>
+                    </button>
+                    <button class="dpad-ok" onclick="sendRemoteKey('OK')">OK</button>
+                </div>
+
+                <!-- Channel / Volume / Mute Row -->
+                <div class="remote-action-row">
+                    <div class="remote-ch-group">
+                        <button class="remote-ch-btn" onclick="sendRemoteKey('CH_UP')">
+                            <span class="material-symbols-outlined">expand_less</span>
+                        </button>
+                        <span class="remote-ch-label">CH</span>
+                        <button class="remote-ch-btn" onclick="sendRemoteKey('CH_DOWN')">
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </button>
+                    </div>
+                    <div class="remote-vol-display">
+                        <span class="remote-vol-number" id="remoteVolDisplay">0</span>
+                        <span class="remote-vol-unit">LVL</span>
+                        <div class="remote-vol-bar">
+                            <div class="remote-vol-bar-fill" id="remoteVolBar"></div>
                         </div>
                     </div>
+                    <div class="remote-side-btns">
+                        <button class="remote-mute-btn" onclick="setMute(true)">
+                            <span class="material-symbols-outlined text-secondary">volume_off</span>
+                        </button>
+                        <button class="remote-close-btn" onclick="sendRemoteKey('EXIT')">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Playback Controls -->
+                <div class="remote-playback">
+                    <button class="remote-play-btn" onclick="sendRemoteKey('REWIND')">
+                        <span class="material-symbols-outlined">fast_rewind</span>
+                    </button>
+                    <button class="remote-play-btn remote-play-primary" onclick="sendRemoteKey('PLAY')">
+                        <span class="material-symbols-outlined filled">play_arrow</span>
+                    </button>
+                    <button class="remote-play-btn" onclick="sendRemoteKey('FASTFORWARD')">
+                        <span class="material-symbols-outlined">fast_forward</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Settings Tab -->
             <div id="settings" class="tab-panel">
-                <div class="settings-section">
-                    <h2>Configuration</h2>
-                    <div class="setting-item">
-                        <label for="apiUrl">API URL:</label>
-                        <input type="url" id="apiUrl" placeholder="http://192.168.1.100:8000" value="">
-                        <button class="btn-secondary" onclick="saveApiUrl()">Save</button>
-                    </div>
-                    <button class="btn-primary" onclick="testConnection()">Test Connection</button>
+                <div class="settings-page-header">
+                    <h2 class="settings-page-title">Settings</h2>
                 </div>
 
-                <div class="settings-section">
-                    <h2>TV Information</h2>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="label">Connection:</span>
-                            <span class="value" id="connectionInfo">Unknown</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">API Status:</span>
-                            <span class="value" id="apiStatus">Unknown</span>
-                        </div>
+                <div class="settings-card">
+                    <h3 class="settings-card-title">Configuration</h3>
+                    <div class="settings-field">
+                        <label for="apiUrl" class="settings-label">API URL</label>
+                        <input type="url" id="apiUrl" class="settings-input" placeholder="http://192.168.1.100:8000" value="">
+                    </div>
+                    <div class="settings-btn-row">
+                        <button class="settings-btn-secondary" onclick="saveApiUrl()">Save URL</button>
+                        <button class="settings-btn-primary" onclick="testConnection()">Test Connection</button>
                     </div>
                 </div>
 
-                <div class="settings-section">
-                    <h2>Actions</h2>
-                    <button class="btn-secondary" onclick="refreshAllData()">Refresh All Data</button>
-                    <button class="btn-secondary" onclick="resetSettings()">Reset Settings</button>
+                <div class="settings-card">
+                    <h3 class="settings-card-title">TV Information</h3>
+                    <div class="settings-info-row">
+                        <span class="settings-info-label">Connection</span>
+                        <span class="settings-info-value" id="connectionInfo">Unknown</span>
+                    </div>
+                    <div class="settings-info-row">
+                        <span class="settings-info-label">API Status</span>
+                        <span class="settings-info-value" id="apiStatus">Unknown</span>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3 class="settings-card-title">Actions</h3>
+                    <button class="settings-btn-secondary" onclick="refreshAllData()">Refresh All Data</button>
+                    <button class="settings-btn-danger" onclick="resetSettings()">Reset Settings</button>
                 </div>
             </div>
         </main>
 
-        <!-- Tab Navigation -->
+        <!-- Bottom Navigation -->
         <nav class="tab-navigation">
             <button class="tab-btn active" data-tab="power">
-                <span class="tab-icon">⚡</span>
+                <span class="material-symbols-outlined tab-icon-mat">power_settings_new</span>
                 <span class="tab-label">Power</span>
             </button>
             <button class="tab-btn" data-tab="volume">
-                <span class="tab-icon">🔊</span>
+                <span class="material-symbols-outlined tab-icon-mat">volume_up</span>
                 <span class="tab-label">Volume</span>
             </button>
             <button class="tab-btn" data-tab="input">
-                <span class="tab-icon">📺</span>
+                <span class="material-symbols-outlined tab-icon-mat">input</span>
                 <span class="tab-label">Input</span>
             </button>
             <button class="tab-btn" data-tab="apps">
-                <span class="tab-icon">📱</span>
+                <span class="material-symbols-outlined tab-icon-mat">apps</span>
                 <span class="tab-label">Apps</span>
             </button>
             <button class="tab-btn" data-tab="remote">
-                <span class="tab-icon">🎮</span>
+                <span class="material-symbols-outlined tab-icon-mat">videogame_asset</span>
                 <span class="tab-label">Remote</span>
-            </button>
-            <button class="tab-btn" data-tab="settings">
-                <span class="tab-icon">⚙️</span>
-                <span class="tab-label">Settings</span>
             </button>
         </nav>
     </div>

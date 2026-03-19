@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   vizzy:
     container_name: ${CONTAINER_NAME:-vizzy}
