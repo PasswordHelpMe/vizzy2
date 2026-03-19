@@ -95,8 +95,10 @@ body {
     z-index: 100;
     height: var(--header-height);
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
 }
 
 .header-btn {
@@ -446,37 +448,61 @@ body {
 
 /* Volume Controls Grid */
 .volume-controls-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    flex-direction: row;
     gap: 1.5rem;
     margin-bottom: 2rem;
     height: 360px;
 }
 
 .volume-slider-column {
-    position: relative;
+    flex: 1;
     display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.volume-marks {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    opacity: 0.3;
+    flex-shrink: 0;
+    padding: 0.5rem 0;
+}
+
+.volume-marks span {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: right;
+    width: 1.5rem;
 }
 
 .volume-track {
-    width: 100%;
-    height: 100%;
+    flex: 1;
     background: var(--surface-container-lowest);
     border-radius: var(--radius-xl);
     position: relative;
     overflow: hidden;
-    display: flex;
-    flex-direction: column-reverse;
-    padding: 4px;
+    cursor: pointer;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .volume-track-fill {
-    width: 100%;
-    border-radius: var(--radius-xl);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0%;
     background: linear-gradient(to top, var(--primary-container), var(--primary));
     box-shadow: 0 0 15px rgba(0, 228, 117, 0.3);
-    position: relative;
-    transition: height 0.15s;
+    border-radius: var(--radius-xl);
+    transition: height 0.05s linear;
+    pointer-events: none;
 }
 
 .volume-track-thumb {
@@ -484,41 +510,13 @@ body {
     left: 4px;
     right: 4px;
     height: 4px;
+    bottom: 0%;
     background: var(--primary-fixed);
     border-radius: 2px;
     box-shadow: 0 0 20px rgba(0, 228, 117, 0.6);
-    transition: bottom 0.15s;
+    transition: bottom 0.05s linear;
+    pointer-events: none;
     z-index: 2;
-}
-
-.volume-slider-input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 3;
-    -webkit-appearance: slider-vertical;
-    writing-mode: vertical-lr;
-    direction: rtl;
-}
-
-.volume-marks {
-    position: absolute;
-    left: -1.5rem;
-    top: 1rem;
-    bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    opacity: 0.3;
-}
-
-.volume-marks span {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
 }
 
 /* Volume Side Controls */
@@ -527,6 +525,7 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     width: 100px;
+    flex-shrink: 0;
 }
 
 .volume-side-btn {

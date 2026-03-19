@@ -1,5 +1,5 @@
 // Service Worker for Vizio TV Controller
-const CACHE_NAME = 'vizio-tv-controller-v1';
+const CACHE_NAME = 'vizio-tv-controller-v2';
 const urlsToCache = [
   '/',
   '/index.html',

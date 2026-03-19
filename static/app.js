@@ -69,18 +69,43 @@ class VizioTVController {
         }
     }
 
-    // Volume Slider
+    // Volume Slider (touch-based on track element)
     setupVolumeSlider() {
-        const volumeSlider = document.getElementById('volumeSlider');
+        const track = document.getElementById('volumeTrack');
+        if (!track) return;
 
-        volumeSlider.addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            this.updateVolumeUI(value);
+        let dragging = false;
+
+        const getVolumeFromY = (clientY) => {
+            const rect = track.getBoundingClientRect();
+            const y = clientY - rect.top;
+            const pct = 1 - (y / rect.height);
+            return Math.round(Math.max(0, Math.min(100, pct * 100)));
+        };
+
+        track.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            track.setPointerCapture(e.pointerId);
+            const vol = getVolumeFromY(e.clientY);
+            this.updateVolumeUI(vol);
         });
 
-        volumeSlider.addEventListener('change', (e) => {
-            const value = parseInt(e.target.value);
-            this.setVolume(value);
+        track.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            const vol = getVolumeFromY(e.clientY);
+            this.updateVolumeUI(vol);
+        });
+
+        track.addEventListener('pointerup', (e) => {
+            if (!dragging) return;
+            dragging = false;
+            const vol = getVolumeFromY(e.clientY);
+            this.updateVolumeUI(vol);
+            this.setVolume(vol);
+        });
+
+        track.addEventListener('pointercancel', () => {
+            dragging = false;
         });
     }
 
@@ -90,12 +115,10 @@ class VizioTVController {
         const bigNumber = document.getElementById('volumeBigNumber');
         const trackFill = document.getElementById('volumeTrackFill');
         const trackThumb = document.getElementById('volumeTrackThumb');
-        const slider = document.getElementById('volumeSlider');
 
         if (bigNumber) bigNumber.textContent = value;
         if (trackFill) trackFill.style.height = `${value}%`;
-        if (trackThumb) trackThumb.style.bottom = `calc(${value}% + 4px)`;
-        if (slider) slider.value = value;
+        if (trackThumb) trackThumb.style.bottom = `${value}%`;
 
         // Power tab bento
         const bentoVol = document.getElementById('volumeStatus');
