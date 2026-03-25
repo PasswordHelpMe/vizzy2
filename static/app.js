@@ -31,6 +31,10 @@ class VizioTVController {
 
                 tabPanels.forEach(panel => panel.classList.remove('active'));
                 document.getElementById(targetTab).classList.add('active');
+
+                if (targetTab === 'input' && this.tvInfo) {
+                    this.updateActiveInput(this.tvInfo.input);
+                }
             });
         });
     }
@@ -348,8 +352,10 @@ class VizioTVController {
             }
         });
 
-        // Set active state on matching card
-        const activeCard = inputGrid.querySelector(`[data-input="${currentInput}"]`);
+        // Set active state on matching card (normalize spaces/hyphens for matching)
+        const normalized = currentInput.replace(/\s+/g, '-');
+        const activeCard = inputGrid.querySelector(`[data-input="${normalized}"]`) ||
+                           inputGrid.querySelector(`[data-input="${currentInput}"]`);
         if (activeCard) {
             activeCard.classList.add('input-card-active');
             const icon = activeCard.querySelector('.input-card-icon');
