@@ -257,9 +257,7 @@ class VizioTVController {
 
         // Input
         const inputStatus = document.getElementById('inputStatus');
-        const currentInput = document.getElementById('currentInputDisplay');
         if (inputStatus) inputStatus.textContent = tvInfo.input || 'Unknown';
-        if (currentInput) currentInput.textContent = tvInfo.input || 'Unknown';
         this.updateActiveInput(tvInfo.input);
 
         // Mute
