@@ -35,18 +35,32 @@ class VizioTVController {
         });
     }
 
-    // Settings button opens settings tab
+    // Settings button toggles settings tab
     setupSettingsButton() {
         const settingsBtn = document.getElementById('settingsBtn');
         if (settingsBtn) {
+            this._previousTab = 'power';
             settingsBtn.addEventListener('click', () => {
-                const tabButtons = document.querySelectorAll('.tab-btn');
-                const tabPanels = document.querySelectorAll('.tab-panel');
+                const settingsPanel = document.getElementById('settings');
+                const isSettingsOpen = settingsPanel.classList.contains('active');
 
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabPanels.forEach(panel => panel.classList.remove('active'));
-
-                document.getElementById('settings').classList.add('active');
+                if (isSettingsOpen) {
+                    // Go back to previous tab
+                    const tabButtons = document.querySelectorAll('.tab-btn');
+                    const tabPanels = document.querySelectorAll('.tab-panel');
+                    tabPanels.forEach(panel => panel.classList.remove('active'));
+                    document.getElementById(this._previousTab).classList.add('active');
+                    tabButtons.forEach(btn => {
+                        btn.classList.toggle('active', btn.getAttribute('data-tab') === this._previousTab);
+                    });
+                } else {
+                    // Save current tab and open settings
+                    const activeBtn = document.querySelector('.tab-btn.active');
+                    if (activeBtn) this._previousTab = activeBtn.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+                    settingsPanel.classList.add('active');
+                }
             });
         }
     }
@@ -242,6 +256,7 @@ class VizioTVController {
         const currentInput = document.getElementById('currentInputDisplay');
         if (inputStatus) inputStatus.textContent = tvInfo.input || 'Unknown';
         if (currentInput) currentInput.textContent = tvInfo.input || 'Unknown';
+        this.updateActiveInput(tvInfo.input);
 
         // Mute
         const muteStatus = document.getElementById('muteStatus');
@@ -308,6 +323,52 @@ class VizioTVController {
             }
         } catch (error) {
             this.showToast('Failed to control mute', 'error');
+        }
+    }
+
+    // Update active input card highlighting
+    updateActiveInput(currentInput) {
+        if (!currentInput) return;
+        const inputGrid = document.getElementById('inputGrid');
+        if (!inputGrid) return;
+
+        // Clear all active states
+        inputGrid.querySelectorAll('.input-card').forEach(card => {
+            card.classList.remove('input-card-active');
+            const icon = card.querySelector('.input-card-icon');
+            if (icon) icon.classList.remove('filled');
+            const dot = card.querySelector('.input-active-dot-wrapper');
+            if (dot) dot.remove();
+            const name = card.querySelector('.input-card-name');
+            if (name) name.classList.remove('active');
+            const status = card.querySelector('.input-card-status');
+            if (status) {
+                status.classList.remove('active');
+                status.textContent = 'Ready';
+            }
+        });
+
+        // Set active state on matching card
+        const activeCard = inputGrid.querySelector(`[data-input="${currentInput}"]`);
+        if (activeCard) {
+            activeCard.classList.add('input-card-active');
+            const icon = activeCard.querySelector('.input-card-icon');
+            if (icon) icon.classList.add('filled');
+            // Add active dot
+            const top = activeCard.querySelector('.input-card-top');
+            if (top && !top.querySelector('.input-active-dot-wrapper')) {
+                const dotWrapper = document.createElement('div');
+                dotWrapper.className = 'input-active-dot-wrapper';
+                dotWrapper.innerHTML = '<span class="input-active-dot-ping"></span><span class="input-active-dot"></span>';
+                top.appendChild(dotWrapper);
+            }
+            const name = activeCard.querySelector('.input-card-name');
+            if (name) name.classList.add('active');
+            const status = activeCard.querySelector('.input-card-status');
+            if (status) {
+                status.classList.add('active');
+                status.textContent = 'Current Active';
+            }
         }
     }
 

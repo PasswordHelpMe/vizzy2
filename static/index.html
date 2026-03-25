@@ -152,7 +152,7 @@
                 </div>
 
                 <div class="input-bento-grid" id="inputGrid">
-                    <button class="input-card" onclick="setInput('HDMI-1')">
+                    <button class="input-card" data-input="HDMI-1" onclick="setInput('HDMI-1')">
                         <div class="input-card-top">
                             <span class="material-symbols-outlined input-card-icon">settings_input_hdmi</span>
                         </div>
@@ -161,29 +161,25 @@
                             <span class="input-card-status">Ready</span>
                         </div>
                     </button>
-                    <button class="input-card input-card-active" onclick="setInput('HDMI-2')" id="inputHDMI2">
+                    <button class="input-card" data-input="HDMI-2" onclick="setInput('HDMI-2')">
                         <div class="input-card-top">
-                            <span class="material-symbols-outlined input-card-icon filled">settings_input_hdmi</span>
-                            <div class="input-active-dot-wrapper">
-                                <span class="input-active-dot-ping"></span>
-                                <span class="input-active-dot"></span>
-                            </div>
+                            <span class="material-symbols-outlined input-card-icon">settings_input_hdmi</span>
                         </div>
                         <div class="input-card-bottom">
-                            <span class="input-card-name active">HDMI 2</span>
-                            <span class="input-card-status active">Current Active</span>
+                            <span class="input-card-name">HDMI 2</span>
+                            <span class="input-card-status">Ready</span>
                         </div>
                     </button>
-                    <button class="input-card" onclick="setInput('HDMI-3')">
+                    <button class="input-card" data-input="HDMI-3" onclick="setInput('HDMI-3')">
                         <div class="input-card-top">
                             <span class="material-symbols-outlined input-card-icon">settings_input_hdmi</span>
                         </div>
                         <div class="input-card-bottom">
                             <span class="input-card-name">HDMI 3</span>
-                            <span class="input-card-status">Offline</span>
+                            <span class="input-card-status">Ready</span>
                         </div>
                     </button>
-                    <button class="input-card" onclick="setInput('TV')">
+                    <button class="input-card" data-input="TV" onclick="setInput('TV')">
                         <div class="input-card-top">
                             <span class="material-symbols-outlined input-card-icon">tv</span>
                         </div>
@@ -194,7 +190,7 @@
                     </button>
                 </div>
 
-                <button class="input-airplay-row" onclick="setInput('SMARTCAST')">
+                <button class="input-airplay-row" data-input="SMARTCAST" onclick="setInput('SMARTCAST')">
                     <div class="input-airplay-left">
                         <span class="material-symbols-outlined text-tertiary">airplay</span>
                         <div>
