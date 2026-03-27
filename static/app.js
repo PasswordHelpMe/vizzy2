@@ -328,14 +328,22 @@ class VizioTVController {
         }
     }
 
+    // Normalize input name for comparison (lowercase, strip spaces/hyphens/underscores)
+    normalizeInputName(name) {
+        return (name || '').toLowerCase().replace(/[\s\-_]+/g, '');
+    }
+
     // Update active input card highlighting
     updateActiveInput(currentInput) {
         if (!currentInput) return;
-        const inputGrid = document.getElementById('inputGrid');
-        if (!inputGrid) return;
+        const inputPanel = document.getElementById('input');
+        if (!inputPanel) return;
+
+        const allCards = inputPanel.querySelectorAll('[data-input]');
+        const normalizedCurrent = this.normalizeInputName(currentInput);
 
         // Clear all active states
-        inputGrid.querySelectorAll('.input-card').forEach(card => {
+        allCards.forEach(card => {
             card.classList.remove('input-card-active');
             const icon = card.querySelector('.input-card-icon');
             if (icon) icon.classList.remove('filled');
@@ -346,32 +354,40 @@ class VizioTVController {
             const status = card.querySelector('.input-card-status');
             if (status) {
                 status.classList.remove('active');
-                status.textContent = 'Ready';
+                if (!card.classList.contains('input-airplay-row')) {
+                    status.textContent = 'Ready';
+                } else {
+                    status.textContent = 'Ready to Stream';
+                }
             }
         });
 
-        // Set active state on matching card (normalize spaces/hyphens for matching)
-        const normalized = currentInput.replace(/\s+/g, '-');
-        const activeCard = inputGrid.querySelector(`[data-input="${normalized}"]`) ||
-                           inputGrid.querySelector(`[data-input="${currentInput}"]`);
+        // Find matching card via normalized comparison
+        let activeCard = null;
+        allCards.forEach(card => {
+            if (this.normalizeInputName(card.getAttribute('data-input')) === normalizedCurrent) {
+                activeCard = card;
+            }
+        });
+
         if (activeCard) {
             activeCard.classList.add('input-card-active');
             const icon = activeCard.querySelector('.input-card-icon');
             if (icon) icon.classList.add('filled');
             // Add active dot
-            const top = activeCard.querySelector('.input-card-top');
+            const top = activeCard.querySelector('.input-card-top') || activeCard.querySelector('.input-airplay-left');
             if (top && !top.querySelector('.input-active-dot-wrapper')) {
                 const dotWrapper = document.createElement('div');
                 dotWrapper.className = 'input-active-dot-wrapper';
                 dotWrapper.innerHTML = '<span class="input-active-dot-ping"></span><span class="input-active-dot"></span>';
                 top.appendChild(dotWrapper);
             }
-            const name = activeCard.querySelector('.input-card-name');
+            const name = activeCard.querySelector('.input-card-name') || activeCard.querySelector('.input-airplay-name');
             if (name) name.classList.add('active');
-            const status = activeCard.querySelector('.input-card-status');
+            const status = activeCard.querySelector('.input-card-status') || activeCard.querySelector('.input-airplay-status');
             if (status) {
                 status.classList.add('active');
-                status.textContent = 'Current Active';
+                status.textContent = 'Active';
             }
         }
     }
