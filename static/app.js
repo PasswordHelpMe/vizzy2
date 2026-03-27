@@ -251,6 +251,9 @@ class VizioTVController {
             powerText.textContent = isOn ? 'POWER OFF SYSTEM' : 'POWER ON SYSTEM';
         }
 
+        // Swap theme colors based on power state
+        document.documentElement.setAttribute('data-power-state', isOn ? 'on' : 'off');
+
         // Volume
         const vol = tvInfo.volume || 0;
         this.updateVolumeUI(vol);
