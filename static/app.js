@@ -553,6 +553,26 @@ function resetSettings() { app.resetSettings(); }
 function refreshAllData() { app.refreshAllData(); }
 function togglePower() { app.togglePower(); }
 function cycleSoundMode() { app.showToast('Sound mode cycling', 'info'); }
+function switchToTab(tabName) {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabPanels.forEach(panel => panel.classList.remove('active'));
+    const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (targetBtn) targetBtn.classList.add('active');
+    const targetPanel = document.getElementById(tabName);
+    if (targetPanel) targetPanel.classList.add('active');
+    if (tabName === 'input' && app.tvInfo) {
+        app.updateActiveInput(app.tvInfo.input);
+    }
+}
+function toggleMute() {
+    if (app.tvInfo) {
+        app.setMute(!app.tvInfo.muted);
+    } else {
+        app.setMute(true);
+    }
+}
 
 // Initialize
 let app;

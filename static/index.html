@@ -41,7 +41,7 @@
 
                 <!-- Bento Status Grid -->
                 <div class="bento-grid">
-                    <div class="bento-card bento-square">
+                    <div class="bento-card bento-square bento-tappable" onclick="switchToTab('volume')">
                         <div class="bento-card-header">
                             <span class="material-symbols-outlined bento-icon text-primary">volume_up</span>
                             <span class="bento-label">Volume</span>
@@ -51,7 +51,7 @@
                             <span class="bento-unit">%</span>
                         </div>
                     </div>
-                    <div class="bento-card bento-square">
+                    <div class="bento-card bento-square bento-tappable" onclick="switchToTab('input')">
                         <div class="bento-card-header">
                             <span class="material-symbols-outlined bento-icon text-tertiary">input</span>
                             <span class="bento-label">Input</span>
@@ -60,7 +60,7 @@
                             <span class="bento-input-name" id="inputStatus">HDMI 1</span>
                         </div>
                     </div>
-                    <div class="bento-card">
+                    <div class="bento-card bento-tappable" onclick="toggleMute()">
                         <div class="bento-card-header">
                             <span class="material-symbols-outlined bento-icon text-muted">volume_off</span>
                             <span class="bento-label">Muted</span>

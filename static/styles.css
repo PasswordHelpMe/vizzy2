@@ -318,6 +318,17 @@ body {
     text-align: left;
 }
 
+.bento-tappable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.bento-tappable:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+}
+
 .bento-square {
     aspect-ratio: 1;
 }
